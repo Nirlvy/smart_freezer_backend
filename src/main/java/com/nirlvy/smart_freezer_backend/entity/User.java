@@ -18,5 +18,7 @@ public class User {
     private String userName;
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
+    private Integer shelves;
+    private Integer sold;
     private Date createTime;
 }

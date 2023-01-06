@@ -26,7 +26,7 @@ public class UserController {
 
     @PostMapping
     public boolean saveUser(@RequestBody User user) {
-        return userService.saveUser(user);
+        return userService.saveOrUpdate(user);
     }
 
     @GetMapping
@@ -39,9 +39,15 @@ public class UserController {
         return userService.removeById(id);
     }
 
+    @DeleteMapping("/del/batch")
+    public boolean deleteBatch(@RequestBody List<Integer> ids) {
+        return userService.removeBatchByIds(ids);
+    }
+
     @GetMapping("/page")
     public IPage<User> findPage(@RequestParam(required = false) Integer id,
             @RequestParam(defaultValue = "") String userName, @RequestParam(defaultValue = "") String createTime,
+            @RequestParam(required = false) Integer shelves, @RequestParam(required = false) Integer sold,
             @RequestParam Integer pageNum, @RequestParam Integer pageSize) {
         IPage<User> page = new Page<>(pageNum, pageSize);
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
@@ -49,14 +55,10 @@ public class UserController {
             queryWrapper.eq("id", id);
         queryWrapper.like("userName", userName);
         queryWrapper.like("createTime", createTime);
+        if (shelves != null)
+            queryWrapper.between("shelves", shelves - 100, shelves + 100);
+        if (sold != null)
+            queryWrapper.between("sold", sold - 100, sold + 100);
         return userService.page(page, queryWrapper);
     }
-
-    // @GetMapping("/page")
-    // public Map<String, Object> findPage(@RequestParam Integer id, @RequestParam
-    // String userName,
-    // @RequestParam String create_time, @RequestParam Integer pageNum,
-    // @RequestParam Integer pageSize) {
-    // return userService.findPage(id, userName, create_time, pageNum, pageSize);
-    // }
 }

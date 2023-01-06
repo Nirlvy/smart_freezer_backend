@@ -9,10 +9,6 @@ import com.nirlvy.smart_freezer_backend.mapper.UserMapper;
 @Service
 public class UserService extends ServiceImpl<UserMapper, User> {
 
-    public boolean saveUser(User user) {
-        return saveOrUpdate(user);
-    }
-
     // @Autowired
     // private UserMapper userMapper;
 
