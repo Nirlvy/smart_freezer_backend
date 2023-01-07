@@ -17,9 +17,9 @@ public class CodeGenerator {
                         "root", "520624iL")
                 .globalConfig(builder -> {
                     builder.author("nirlvy") // 设置作者
-                            .enableSwagger() // 开启 swagger 模式
-                            // .fileOverride() // 覆盖已生成文件
-                            .outputDir("/home/nirlvy/Documents/smart_freezer_total/smart_freezer_backend/src/main/java"); // 指定输出目录
+                            //.enableSwagger() // 开启 swagger 模式
+                            .outputDir(
+                                    "/home/nirlvy/Documents/smart_freezer_total/smart_freezer_backend/src/main/java"); // 指定输出目录
                 })
                 .packageConfig(builder -> {
                     builder.parent("com.nirlvy.smart_freezer_backend") // 设置父包名
@@ -30,7 +30,14 @@ public class CodeGenerator {
                 .strategyConfig(builder -> {
                     builder.addInclude("user") // 设置需要生成的表名
                             .addTablePrefix("t_", "c_")// 设置过滤表前缀
-                            .mapperBuilder().enableFileOverride();
+                            .entityBuilder()
+                            .enableFileOverride()
+                            .mapperBuilder()
+                            .enableFileOverride()
+                            .serviceBuilder()
+                            .enableFileOverride()
+                            .controllerBuilder()
+                            .enableFileOverride();
                 })
                 .execute();
     }
