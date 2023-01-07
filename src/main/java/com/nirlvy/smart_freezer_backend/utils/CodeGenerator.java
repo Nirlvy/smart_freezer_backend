@@ -19,7 +19,7 @@ public class CodeGenerator {
                     builder.author("nirlvy") // 设置作者
                             .enableSwagger() // 开启 swagger 模式
                             // .fileOverride() // 覆盖已生成文件
-                            .outputDir("/home/nirlvy/Documents/smart_freezer_total/smart_freezer_backend"); // 指定输出目录
+                            .outputDir("/home/nirlvy/Documents/smart_freezer_total/smart_freezer_backend/src/main/java"); // 指定输出目录
                 })
                 .packageConfig(builder -> {
                     builder.parent("com.nirlvy.smart_freezer_backend") // 设置父包名
