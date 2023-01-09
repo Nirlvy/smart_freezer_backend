@@ -38,7 +38,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     public boolean login(Ulogin ulogin) {
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("userName", ulogin.getUserName());
-        queryWrapper.eq("userName", ulogin.getUserName());
+        queryWrapper.eq("password", ulogin.getPassword());
         User one = getOne(queryWrapper);
         return one != null;
     }
