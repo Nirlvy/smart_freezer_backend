@@ -10,19 +10,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.nirlvy.smart_freezer_backend.entity.Ulogin;
 import com.nirlvy.smart_freezer_backend.entity.User;
 import com.nirlvy.smart_freezer_backend.service.IUserService;
 
-import cn.hutool.poi.excel.ExcelReader;
-import cn.hutool.poi.excel.ExcelUtil;
-import cn.hutool.poi.excel.ExcelWriter;
-import jakarta.servlet.ServletOutputStream;
+import cn.hutool.core.util.StrUtil;
 import jakarta.servlet.http.HttpServletResponse;
 
-import java.io.InputStream;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +35,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class UserController {
     @Autowired
     private IUserService userService;
+
+    @PostMapping("/login")
+    public boolean login(@RequestBody Ulogin ulogin) {
+        String userName = ulogin.getUserName();
+        String password = ulogin.getPassword();
+        if (StrUtil.isBlank(userName) || StrUtil.isBlank(password))
+            return false;
+        return userService.login(ulogin);
+    }
 
     @PostMapping
     public boolean saveUser(@RequestBody User user) {
@@ -66,41 +70,18 @@ public class UserController {
             @RequestParam(defaultValue = "") String userName, @RequestParam(defaultValue = "") String createTime,
             @RequestParam(required = false) Integer shelves, @RequestParam(required = false) Integer sold,
             @RequestParam Integer pageNum, @RequestParam Integer pageSize) {
-        IPage<User> page = new Page<>(pageNum, pageSize);
-        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        if (id != null)
-            queryWrapper.eq("id", id);
-        queryWrapper.like("userName", userName);
-        queryWrapper.like("createTime", createTime);
-        if (shelves != null)
-            queryWrapper.between("shelves", shelves - 100, shelves + 100);
-        if (sold != null)
-            queryWrapper.between("sold", sold - 100, sold + 100);
-        return userService.page(page, queryWrapper);
+
+        return userService.findPage(id, userName, createTime, shelves, sold, pageNum, pageSize);
+
     }
 
     @GetMapping("/export")
-    public void export(HttpServletResponse response) throws Exception {
-        List<User> list = userService.list();
-        ExcelWriter writer = ExcelUtil.getWriter(true);
-
-        writer.write(list, true);
-
-        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;chatset=utf-8");
-        String fileName = java.net.URLEncoder.encode("用户信息", "UTF-8");
-        response.setHeader("Content-Disposition", "attachment;filename=" + fileName + ".xlsx");
-
-        ServletOutputStream out = response.getOutputStream();
-        writer.flush(out, true);
-        out.close();
-        writer.close();
+    public boolean export(HttpServletResponse response) throws Exception {
+        return userService.export(response);
     }
 
     @PostMapping("/import")
-    public void imp(MultipartFile file) throws Exception {
-        InputStream inputStream = file.getInputStream();
-        ExcelReader reader = ExcelUtil.getReader(inputStream);
-        List<User> list = reader.readAll(User.class);
-        userService.saveOrUpdateBatch(list);
+    public boolean imp(MultipartFile file) throws Exception {
+        return userService.imp(file);
     }
 }
