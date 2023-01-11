@@ -59,7 +59,7 @@ public class UserController {
 
     @PostMapping
     public boolean saveUser(@RequestBody User user) {
-        return userService.saveOrUpdate(user);
+        return userService.sOu(user);
     }
 
     @GetMapping

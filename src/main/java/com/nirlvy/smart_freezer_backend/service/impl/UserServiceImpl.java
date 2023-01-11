@@ -124,4 +124,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         return page(page, queryWrapper);
     }
 
+    @Override
+    public boolean sOu(User user) {
+        if (user.getPassword() == "") {
+            user.setPassword(null);
+        }
+        return saveOrUpdate(user);
+    }
+
 }

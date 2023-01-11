@@ -31,4 +31,6 @@ public interface IUserService extends IService<User> {
 
     User register(Ulogin ulogin);
 
+    boolean sOu(User user);
+
 }
