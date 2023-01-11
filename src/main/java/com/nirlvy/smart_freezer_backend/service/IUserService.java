@@ -20,7 +20,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IUserService extends IService<User> {
 
-    boolean login(Ulogin ulogin);
+    Ulogin login(Ulogin ulogin);
 
     boolean export(HttpServletResponse response) throws Exception;
 
@@ -28,5 +28,7 @@ public interface IUserService extends IService<User> {
 
     IPage<User> findPage(Integer id, String userName, String createTime, Integer shelves, Integer sold, Integer pageNum,
             Integer pageSize);
+
+    User register(Ulogin ulogin);
 
 }

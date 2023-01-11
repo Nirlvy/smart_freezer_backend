@@ -1,10 +1,13 @@
 package com.nirlvy.smart_freezer_backend.service.impl;
 
+import com.nirlvy.smart_freezer_backend.common.Constants;
 import com.nirlvy.smart_freezer_backend.entity.Ulogin;
 import com.nirlvy.smart_freezer_backend.entity.User;
+import com.nirlvy.smart_freezer_backend.exception.ServiceException;
 import com.nirlvy.smart_freezer_backend.mapper.UserMapper;
 import com.nirlvy.smart_freezer_backend.service.IUserService;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
@@ -34,13 +37,48 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IUserService {
 
-    @Override
-    public boolean login(Ulogin ulogin) {
+    private User getuserinfo(Ulogin ulogin) {
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("userName", ulogin.getUserName());
         queryWrapper.eq("password", ulogin.getPassword());
-        User one = getOne(queryWrapper);
-        return one != null;
+        User one;
+        try {
+            one = getOne(queryWrapper);
+        } catch (Exception e) {
+            throw new ServiceException(Constants.CODE_500, "系统错误");
+        }
+        return one;
+    }
+
+    @Override
+    public Ulogin login(Ulogin ulogin) {
+        User one = getuserinfo(ulogin);
+        if (one != null) {
+            BeanUtil.copyProperties(one, ulogin, true);
+            return ulogin;
+        } else {
+            throw new ServiceException(Constants.CODE_600, "用户名或密码错误");
+        }
+    }
+
+    @Override
+    public User register(Ulogin ulogin) {
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("userName", ulogin.getUserName());
+        User one;
+        try {
+            one = getOne(queryWrapper);
+        } catch (Exception e) {
+            throw new ServiceException(Constants.CODE_500, "系统错误");
+        }
+        if (one == null) {
+            one = new User();
+            BeanUtil.copyProperties(ulogin, one, true);
+            save(one);
+        } else {
+            throw new ServiceException(Constants.CODE_600, "用户名已存在");
+        }
+        return one;
     }
 
     @Override

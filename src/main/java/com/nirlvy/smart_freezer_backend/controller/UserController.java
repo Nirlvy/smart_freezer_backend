@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.nirlvy.smart_freezer_backend.common.Constants;
+import com.nirlvy.smart_freezer_backend.common.Result;
 import com.nirlvy.smart_freezer_backend.entity.Ulogin;
 import com.nirlvy.smart_freezer_backend.entity.User;
 import com.nirlvy.smart_freezer_backend.service.IUserService;
@@ -37,12 +39,22 @@ public class UserController {
     private IUserService userService;
 
     @PostMapping("/login")
-    public boolean login(@RequestBody Ulogin ulogin) {
+    public Result login(@RequestBody Ulogin ulogin) {
         String userName = ulogin.getUserName();
         String password = ulogin.getPassword();
         if (StrUtil.isBlank(userName) || StrUtil.isBlank(password))
-            return false;
-        return userService.login(ulogin);
+            return Result.error(Constants.CODE_400, "参数错误");
+        Ulogin login = userService.login(ulogin);
+        return Result.success(login);
+    }
+
+    @PostMapping("/register")
+    public Result register(@RequestBody Ulogin ulogin) {
+        String userName = ulogin.getUserName();
+        String password = ulogin.getPassword();
+        if (StrUtil.isBlank(userName) || StrUtil.isBlank(password))
+            return Result.error(Constants.CODE_400, "参数错误");
+        return Result.success(userService.register(ulogin));
     }
 
     @PostMapping
