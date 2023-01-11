@@ -6,6 +6,7 @@ import com.nirlvy.smart_freezer_backend.entity.User;
 import com.nirlvy.smart_freezer_backend.exception.ServiceException;
 import com.nirlvy.smart_freezer_backend.mapper.UserMapper;
 import com.nirlvy.smart_freezer_backend.service.IUserService;
+import com.nirlvy.smart_freezer_backend.utils.TokenUtils;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.poi.excel.ExcelReader;
@@ -55,6 +56,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         User one = getuserinfo(ulogin);
         if (one != null) {
             BeanUtil.copyProperties(one, ulogin, true);
+            String token = TokenUtils.genToken(one.getId().toString(), one.getPassword().toString());
+            ulogin.setToken(token);
             return ulogin;
         } else {
             throw new ServiceException(Constants.CODE_600, "用户名或密码错误");

@@ -10,4 +10,6 @@ public class Ulogin {
 
     @Alias("密码")
     private String password;
+
+    private String token;
 }
