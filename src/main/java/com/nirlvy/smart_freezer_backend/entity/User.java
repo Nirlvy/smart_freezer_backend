@@ -46,4 +46,7 @@ public class User implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @Alias("注册时间")
     private LocalDateTime createTime;
+
+    @Alias("头像")
+    private String img;
 }

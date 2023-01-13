@@ -2,9 +2,13 @@ package com.nirlvy.smart_freezer_backend.controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URLEncoder;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
+import org.apache.commons.codec.binary.Hex;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,7 +27,6 @@ import com.nirlvy.smart_freezer_backend.mapper.FileMapper;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.crypto.SecureUtil;
 import jakarta.annotation.Resource;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
@@ -48,7 +51,7 @@ public class FileController {
         String fileUUID = uuid + StrUtil.DOT + type;
         File uploadFile = new File(fileUploadPath + fileUUID);
         // 查询并读取文件md5是否存在
-        String md5 = SecureUtil.md5(uploadFile);
+        String md5 = getMd5ByInputStream(file);
         Files dbfiles = getFileByMd5(md5);
         String url;
         if (dbfiles != null) {
@@ -65,14 +68,14 @@ public class FileController {
                 throw new ServiceException(Constants.CODE_500, "保存失败");
             }
             url = "http://localhost:8080/file/" + fileUUID;
+            Files saveFile = new Files();
+            saveFile.setUrl(url);
+            saveFile.setMd5(md5);
+            saveFile.setName(originalFilename);
+            saveFile.setType(type);
+            saveFile.setSize(size / 1024);
+            fileMapper.insert(saveFile);
         }
-        Files saveFile = new Files();
-        saveFile.setUrl(url);
-        saveFile.setMd5(md5);
-        saveFile.setName(originalFilename);
-        saveFile.setType(type);
-        saveFile.setSize(size / 1024);
-        fileMapper.insert(saveFile);
         return url;
     }
 
@@ -106,4 +109,25 @@ public class FileController {
         List<Files> filesList = fileMapper.selectList(queryWrapper);
         return filesList.size() == 0 ? null : filesList.get(0);
     }
+
+    public static String getMd5ByInputStream(MultipartFile file) {
+        try {
+            InputStream inputStream = file.getInputStream();
+            // 拿到一个MD5转换器（如果想要SHA1参数换成”SHA1”）
+            MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+            // 分多次将一个文件读入，对于大型文件而言，比较推荐这种方式；
+            byte[] buffer = new byte[1024];
+            int length = -1;
+            while ((length = inputStream.read(buffer, 0, 1024)) != -1) {
+                messageDigest.update(buffer, 0, length);
+            }
+            // 转换并返回包含16个元素字节数组,返回数值范围为-128到127
+            byte[] md5Bytes = messageDigest.digest();
+            // 使用Hex编码
+            return Hex.encodeHexString(md5Bytes);
+        } catch (NoSuchAlgorithmException | IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

@@ -12,4 +12,7 @@ public class Ulogin {
     private String password;
 
     private String token;
+
+    @Alias("头像")
+    private String img;
 }
