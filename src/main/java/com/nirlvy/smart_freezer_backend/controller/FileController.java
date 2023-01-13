@@ -3,6 +3,7 @@ package com.nirlvy.smart_freezer_backend.controller;
 import java.io.File;
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,47 +39,41 @@ public class FileController {
     private FileMapper fileMapper;
 
     @PostMapping("/upload")
-    public void upload(@RequestParam MultipartFile file) {
+    public String upload(@RequestParam MultipartFile file) {
         String originalFilename = file.getOriginalFilename();
         String type = FileUtil.extName(originalFilename);
-        long size = file.getSize();
-        // 磁盘存储
-        File uploadParentFile = new File(fileUploadPath);
-        // 判断目录存在
-        if (!uploadParentFile.exists()) {
-            uploadParentFile.mkdirs();
-        }
+        Long size = file.getSize();
         // 标识码
         String uuid = IdUtil.fastSimpleUUID();
         String fileUUID = uuid + StrUtil.DOT + type;
-        try {
-            File uploadFile = new File(fileUploadPath + fileUUID);
-
-            // 查询并读取文件md5是否存在
-            String md5 = SecureUtil.md5(uploadFile);
-            QueryWrapper<Files> queryWrapper = new QueryWrapper<>();
-            queryWrapper.eq("md5", md5);
-            Files files = fileMapper.selectOne(queryWrapper);
-
-            String url;
-            if (files != null) {
-                url = files.getUrl();
-                throw new ServiceException(Constants.CODE_400, "文件已存在");
-            } else {
-                // 转存
-                file.transferTo(uploadFile);
-                url = "http://localhost:8080/file/" + fileUUID;
-                Files saveFile = new Files();
-                saveFile.setUrl(url);
-                saveFile.setMd5(md5);
-                saveFile.setName(originalFilename);
-                saveFile.setType(type);
-                saveFile.setSize(size / 1024);
-                fileMapper.insert(saveFile);
+        File uploadFile = new File(fileUploadPath + fileUUID);
+        // 查询并读取文件md5是否存在
+        String md5 = SecureUtil.md5(uploadFile);
+        Files dbfiles = getFileByMd5(md5);
+        String url;
+        if (dbfiles != null) {
+            url = dbfiles.getUrl();
+            uploadFile.delete();
+        } else {
+            File parentFile = uploadFile.getParentFile();
+            if (!parentFile.exists()) {
+                parentFile.mkdirs();
             }
-        } catch (IOException e) {
-            throw new ServiceException(Constants.CODE_500, "上传失败");
+            try {
+                file.transferTo(uploadFile);
+            } catch (IOException e) {
+                throw new ServiceException(Constants.CODE_500, "保存失败");
+            }
+            url = "http://localhost:8080/file/" + fileUUID;
         }
+        Files saveFile = new Files();
+        saveFile.setUrl(url);
+        saveFile.setMd5(md5);
+        saveFile.setName(originalFilename);
+        saveFile.setType(type);
+        saveFile.setSize(size / 1024);
+        fileMapper.insert(saveFile);
+        return url;
     }
 
     /**
@@ -87,7 +82,6 @@ public class FileController {
      * @param fileUUID
      * @param response
      */
-
     @GetMapping("/{fileUUID}")
     public void download(@PathVariable String fileUUID, HttpServletResponse response) {
         // 根据标识符获取文件
@@ -104,5 +98,12 @@ public class FileController {
         } catch (IOException e) {
             throw new ServiceException(Constants.CODE_500, "下载失败");
         }
+    }
+
+    private Files getFileByMd5(String md5) {
+        QueryWrapper<Files> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("md5", md5);
+        List<Files> filesList = fileMapper.selectList(queryWrapper);
+        return filesList.size() == 0 ? null : filesList.get(0);
     }
 }
