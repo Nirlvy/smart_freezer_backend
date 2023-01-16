@@ -6,7 +6,6 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,16 +28,18 @@ public class FreezerController {
         return freezerService.list(queryWrapper);
     }
 
-    @PostMapping("/home")
+    @GetMapping("/home")
     public Result homeinfo(@RequestParam Integer id) {
         List<Freezer> list = freezerinfo(id);
-        Long totalfreezer = list.stream().count();
+        Integer totalfreezer = list.size();
         Long runfreezer = list.stream().filter(item -> item.getEnable() == true).count();
         Long needfreezer = list.stream().filter(item -> item.getNeed() == true).count();
-        Map<String, Long> result = new HashMap<>();
+        Integer[] freezerId = list.stream().map(Freezer::getId).toArray(Integer[]::new);
+        Map<String, Object> result = new HashMap<>();
         result.put("totalfreezer", totalfreezer);
         result.put("runfreezer", runfreezer);
         result.put("needfreezer", needfreezer);
+        result.put("freezerId", freezerId);
         return Result.success(result);
     }
 

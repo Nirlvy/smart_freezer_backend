@@ -5,6 +5,8 @@ import lombok.Data;
 
 @Data
 public class Ulogin {
+
+    private Integer id;
     @Alias("用户名")
     private String userName;
 
