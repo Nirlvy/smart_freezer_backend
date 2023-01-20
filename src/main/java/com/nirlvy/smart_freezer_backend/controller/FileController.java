@@ -67,6 +67,7 @@ public class FileController {
             } catch (IOException e) {
                 throw new ServiceException(Constants.CODE_500, "保存失败");
             }
+            // TODO:需要修改
             url = "http://localhost:8080/file/" + fileUUID;
             Files saveFile = new Files();
             saveFile.setUrl(url);

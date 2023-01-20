@@ -4,6 +4,7 @@ import com.nirlvy.smart_freezer_backend.common.Constants;
 import com.nirlvy.smart_freezer_backend.entity.Ulogin;
 import com.nirlvy.smart_freezer_backend.entity.User;
 import com.nirlvy.smart_freezer_backend.exception.ServiceException;
+import com.nirlvy.smart_freezer_backend.mapper.RoleMenuMapper;
 import com.nirlvy.smart_freezer_backend.mapper.UserMapper;
 import com.nirlvy.smart_freezer_backend.service.IUserService;
 import com.nirlvy.smart_freezer_backend.utils.TokenUtils;
@@ -12,6 +13,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
+import jakarta.annotation.Resource;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -38,6 +40,9 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IUserService {
 
+    @Resource
+    private RoleMenuMapper roleMenuMapper;
+
     private User getuserinfo(Ulogin ulogin) {
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("userName", ulogin.getUserName());
@@ -58,6 +63,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             BeanUtil.copyProperties(one, ulogin, true);
             String token = TokenUtils.genToken(one.getId().toString(), one.getPassword().toString());
             ulogin.setToken(token);
+            String role = one.getRole();
+            List<Integer> menu = roleMenuMapper.selectByRole(role);
+            ulogin.setMenus(menu);
             return ulogin;
         } else {
             throw new ServiceException(Constants.CODE_600, "用户名或密码错误");

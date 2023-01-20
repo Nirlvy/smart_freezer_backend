@@ -37,6 +37,9 @@ public class User implements Serializable {
     @Alias("密码")
     private String password;
 
+    @Alias("管理员")
+    private String role;
+
     @Alias("上架数")
     private Integer shelves;
 

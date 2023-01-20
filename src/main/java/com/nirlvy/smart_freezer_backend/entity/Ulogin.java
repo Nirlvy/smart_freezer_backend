@@ -1,5 +1,7 @@
 package com.nirlvy.smart_freezer_backend.entity;
 
+import java.util.List;
+
 import cn.hutool.core.annotation.Alias;
 import lombok.Data;
 
@@ -17,4 +19,8 @@ public class Ulogin {
 
     @Alias("头像")
     private String img;
+    
+    @Alias("管理员")
+    private String role;
+    private List<Integer> menus;
 }
