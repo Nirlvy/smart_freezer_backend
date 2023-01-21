@@ -20,7 +20,5 @@ public class Ulogin {
     @Alias("头像")
     private String img;
     
-    @Alias("管理员")
-    private String role;
     private List<Integer> menus;
 }
