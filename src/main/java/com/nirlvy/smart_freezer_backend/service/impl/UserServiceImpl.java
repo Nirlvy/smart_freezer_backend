@@ -85,9 +85,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         if (one == null) {
             one = new User();
             BeanUtil.copyProperties(ulogin, one, true);
-            String token = TokenUtils.genToken(one.getId().toString(), one.getPassword().toString());
-            ulogin.setToken(token);
             save(one);
+            User userinfo = getuserinfo(ulogin);
+            String token = TokenUtils.genToken(userinfo.getId().toString(), one.getPassword().toString());
+            ulogin.setToken(token);
+            List<Integer> menu = roleMenuMapper.selectByRole(userinfo.getRole().toString());
+            ulogin.setMenus(menu);
         } else {
             throw new ServiceException(Constants.CODE_600, "用户名已存在");
         }

@@ -3,7 +3,12 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/smart_freezer?serverTimeZone=GMT%2b8?allowPublicKeyRetrieval=true
     username: root
-    password: 520624iL
+    password: 520624iL    
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+
 mybatis:
   mapper-locations: classpath:mapper/*.xml
 mybatis-plus:

@@ -1,0 +1,9 @@
+{
+  "properties": [
+    {
+      "name": "files.upload.path",
+      "type": "java.lang.String",
+      "description": "上传路径"
+    }
+  ]
+}
