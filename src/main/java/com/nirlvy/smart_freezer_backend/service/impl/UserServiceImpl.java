@@ -132,7 +132,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         if (id != null)
             queryWrapper.eq("id", id);
         queryWrapper.like("userName", userName);
-        queryWrapper.like("createTime", createTime);
+        if (!"null".equals(createTime))
+            queryWrapper.like("createTime", createTime);
         if (shelves != null)
             queryWrapper.between("shelves", shelves - 100, shelves + 100);
         if (sold != null)

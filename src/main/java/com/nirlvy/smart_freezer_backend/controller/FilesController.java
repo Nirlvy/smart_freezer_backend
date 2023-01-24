@@ -22,7 +22,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.nirlvy.smart_freezer_backend.common.Constants;
 import com.nirlvy.smart_freezer_backend.entity.Files;
 import com.nirlvy.smart_freezer_backend.exception.ServiceException;
-import com.nirlvy.smart_freezer_backend.mapper.FileMapper;
+import com.nirlvy.smart_freezer_backend.mapper.FilesMapper;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.IdUtil;
@@ -33,13 +33,13 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping("/file")
-public class FileController {
+public class FilesController {
 
     @Value("${files.upload.path}")
     private String fileUploadPath;
 
     @Resource
-    private FileMapper fileMapper;
+    private FilesMapper fileMapper;
 
     @PostMapping("/upload")
     public String upload(@RequestParam MultipartFile file) {

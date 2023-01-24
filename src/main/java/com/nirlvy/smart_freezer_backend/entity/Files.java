@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 @Data
-@TableName("file")
+@TableName("files")
 public class Files {
 
     @TableId(type = IdType.AUTO)
