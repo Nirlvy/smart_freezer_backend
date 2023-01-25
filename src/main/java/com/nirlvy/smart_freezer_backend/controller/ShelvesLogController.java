@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.nirlvy.smart_freezer_backend.common.Result;
 import com.nirlvy.smart_freezer_backend.entity.ShelvesLog;
 import com.nirlvy.smart_freezer_backend.service.IFreezerService;
 import com.nirlvy.smart_freezer_backend.service.IShelvesLogService;
@@ -35,18 +36,24 @@ public class ShelvesLogController {
     @Autowired
     private IFreezerService freezerService;
 
+    public static class Param {
+        public Integer[] freezerId;
+        public String[] name;
+    }
+
     @PostMapping("/page")
-    public IPage<ShelvesLog> findPage(@RequestParam Integer id, @RequestBody(required = false) Integer[] freezerId,
-            @RequestParam(defaultValue = "") String name, @RequestParam(required = false) Boolean state,
+    public IPage<ShelvesLog> findPage(@RequestParam Integer id,
+            @RequestBody Param datas, @RequestParam(required = false) Boolean state,
             @RequestParam(required = false) String upTime,
             @RequestParam(required = false) String downTime,
             @RequestParam Integer pageNum, @RequestParam Integer pageSize) {
+        Integer[] freezerId = datas.freezerId;
+        String[] name = datas.name;
         if (freezerId == null || freezerId.length == 0) {
             Map<String, Object> homeinfoResult = freezerService.homeinfo(id);
             freezerId = (Integer[]) homeinfoResult.get("freezerId");
         }
         return shelvesLogService.findPage(freezerId, name, state, upTime, downTime, pageNum, pageSize);
-
     }
 
     @DeleteMapping("/{id}")
@@ -57,5 +64,15 @@ public class ShelvesLogController {
     @DeleteMapping("/del/batch")
     public boolean deleteBatch(@RequestBody List<Integer> ids) {
         return shelvesLogService.removeBatchByIds(ids);
+    }
+
+    @PostMapping("/sold")
+    public boolean sold(@RequestBody ShelvesLog shelvesLog) {
+        return shelvesLogService.sold(shelvesLog);
+    }
+
+    @PostMapping("/up")
+    public Result up(@RequestParam Integer id, @RequestParam String name, @RequestParam Integer num) {
+        return shelvesLogService.up(id, name, num);
     }
 }
