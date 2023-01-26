@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,6 +18,8 @@ import com.nirlvy.smart_freezer_backend.common.Result;
 import com.nirlvy.smart_freezer_backend.entity.ShelvesLog;
 import com.nirlvy.smart_freezer_backend.service.IFreezerService;
 import com.nirlvy.smart_freezer_backend.service.IShelvesLogService;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * <p>
@@ -74,5 +77,12 @@ public class ShelvesLogController {
     @PostMapping("/up")
     public Result up(@RequestParam Integer id, @RequestParam String name, @RequestParam Integer num) {
         return shelvesLogService.up(id, name, num);
+    }
+
+    @GetMapping("/export")
+    public boolean export(HttpServletResponse response, @RequestParam Integer id) throws Exception {
+        Map<String, Object> homeinfoResult = freezerService.homeinfo(id);
+        Integer[] freezerId = (Integer[]) homeinfoResult.get("freezerId");
+        return shelvesLogService.export(response, freezerId);
     }
 }
