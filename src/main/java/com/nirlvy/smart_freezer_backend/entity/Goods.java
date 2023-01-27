@@ -25,5 +25,5 @@ public class Goods implements Serializable {
 
     private String name;
 
-    private boolean enable;
+    private boolean disable;
 }

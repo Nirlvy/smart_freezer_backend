@@ -8,15 +8,12 @@ import com.nirlvy.smart_freezer_backend.service.IShelvesLogService;
 
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
-import jakarta.servlet.ServletOutputStream;
-import jakarta.servlet.http.HttpServletResponse;
-
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
-import java.net.URLEncoder;
+import java.io.ByteArrayOutputStream;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -77,23 +74,22 @@ public class ShelvesLogServiceImpl extends ServiceImpl<ShelvesLogMapper, Shelves
     }
 
     @Override
-    public boolean export(HttpServletResponse response, Integer[] freezerId) throws Exception {
+    public byte[] export(Integer[] freezerId) throws Exception {
         QueryWrapper<ShelvesLog> queryWrapper = new QueryWrapper<>();
         queryWrapper.in("freezerId", (Object[]) freezerId);
         List<ShelvesLog> list = list();
+        // 通过工具类创建writer，默认创建xls格式
+        // ExcelWriter writer = ExcelUtil.getWriter();
+        // 创建xlsx格式的
         ExcelWriter writer = ExcelUtil.getWriter(true);
-
+        // 一次性写出内容，使用默认样式，强制输出标题
         writer.write(list, true);
-
-        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;chatset=utf-8");
-        String fileName = URLEncoder.encode("商品信息", "UTF-8");
-        response.setHeader("Content-Disposition", "attachment;filename=" + fileName + ".xlsx");
-
-        ServletOutputStream out = response.getOutputStream();
-        writer.flush(out, true);
-        out.close();
+        // out为OutputStream，需要写出到的目标流
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        writer.flush(stream);
+        // 关闭writer，释放内存
         writer.close();
-        return true;
+        return stream.toByteArray();
     }
 
 }

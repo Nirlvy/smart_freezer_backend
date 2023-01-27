@@ -19,8 +19,6 @@ import com.nirlvy.smart_freezer_backend.entity.ShelvesLog;
 import com.nirlvy.smart_freezer_backend.service.IFreezerService;
 import com.nirlvy.smart_freezer_backend.service.IShelvesLogService;
 
-import jakarta.servlet.http.HttpServletResponse;
-
 /**
  * <p>
  * 前端控制器
@@ -80,9 +78,9 @@ public class ShelvesLogController {
     }
 
     @GetMapping("/export")
-    public boolean export(HttpServletResponse response, @RequestParam Integer id) throws Exception {
+    public byte[] export(@RequestParam Integer id) throws Exception {
         Map<String, Object> homeinfoResult = freezerService.homeinfo(id);
         Integer[] freezerId = (Integer[]) homeinfoResult.get("freezerId");
-        return shelvesLogService.export(response, freezerId);
+        return shelvesLogService.export(freezerId);
     }
 }

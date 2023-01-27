@@ -3,8 +3,6 @@ package com.nirlvy.smart_freezer_backend.service;
 import com.nirlvy.smart_freezer_backend.common.Result;
 import com.nirlvy.smart_freezer_backend.entity.ShelvesLog;
 
-import jakarta.servlet.http.HttpServletResponse;
-
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -24,5 +22,5 @@ public interface IShelvesLogService extends IService<ShelvesLog> {
 
     Result up(Integer id, String name, Integer num);
 
-    boolean export(HttpServletResponse response, Integer[] freezerId) throws Exception;
+    byte[] export(Integer[] freezerId) throws Exception;
 }
