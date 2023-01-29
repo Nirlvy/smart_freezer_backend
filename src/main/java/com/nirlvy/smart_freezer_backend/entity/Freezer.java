@@ -17,8 +17,8 @@ public class Freezer {
     private Integer id;
     private Integer userId;
     private String location;
-    private Integer totalShelves;
-    private Integer totalSold;
+    private Integer capacity;
+    private Integer shelves;
     private Boolean enable;
     private Boolean need;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")

@@ -2,7 +2,6 @@ package com.nirlvy.smart_freezer_backend.controller;
 
 import java.util.List;
 
-import org.apache.ibatis.annotations.Delete;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
