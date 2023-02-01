@@ -29,7 +29,7 @@ public interface IUserService extends IService<User> {
     IPage<User> findPage(Integer id, String userName, String createTime, Integer shelves, Integer sold, Integer pageNum,
             Integer pageSize);
 
-    User register(Ulogin ulogin);
+    Ulogin register(Ulogin ulogin);
 
     boolean sOu(User user);
 

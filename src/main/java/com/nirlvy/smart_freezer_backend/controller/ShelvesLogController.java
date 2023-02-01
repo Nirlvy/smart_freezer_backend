@@ -83,4 +83,9 @@ public class ShelvesLogController {
         Integer[] freezerId = (Integer[]) homeinfoResult.get("freezerId");
         return shelvesLogService.export(freezerId);
     }
+
+    @GetMapping("/freezer")
+    public Result freezer(@RequestParam Integer id){
+        return shelvesLogService.freezer(id);
+    }
 }

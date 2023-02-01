@@ -39,7 +39,7 @@ public class EchartsController {
                             .between("upTime", start, end));
             sold[i - 1] = shelvesLogMapper
                     .selectCount(new QueryWrapper<ShelvesLog>().in("freezerId", (Object[]) freezerId).eq("state", 0)
-                            .between("upTime", start, end));
+                            .between("downTime", start, end));
         }
         return Result.success(CollUtil.newArrayList(shelves, sold));
     }

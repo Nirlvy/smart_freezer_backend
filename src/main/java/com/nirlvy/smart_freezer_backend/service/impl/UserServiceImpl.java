@@ -73,14 +73,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     }
 
     @Override
-    public User register(Ulogin ulogin) {
+    public Ulogin register(Ulogin ulogin) {
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("userName", ulogin.getUserName());
         User one;
         try {
             one = getOne(queryWrapper);
         } catch (Exception e) {
-            throw new ServiceException(Constants.CODE_500, "系统错误");
+            throw new ServiceException(Constants.CODE_500, "系统错误:" + e);
         }
         if (one == null) {
             one = new User();
@@ -94,7 +94,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         } else {
             throw new ServiceException(Constants.CODE_600, "用户名已存在");
         }
-        return one;
+        return ulogin;
     }
 
     @Override

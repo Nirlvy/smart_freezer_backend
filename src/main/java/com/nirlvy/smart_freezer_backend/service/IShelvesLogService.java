@@ -23,4 +23,6 @@ public interface IShelvesLogService extends IService<ShelvesLog> {
     Result up(Integer id, String name, Integer num);
 
     byte[] export(Integer[] freezerId) throws Exception;
+
+    Result freezer(Integer id);
 }
