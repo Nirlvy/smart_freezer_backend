@@ -16,6 +16,7 @@ public class Freezer {
     @TableId(type = IdType.AUTO)
     private Integer id;
     private Integer userId;
+    private String position;
     private String location;
     private Integer capacity;
     private Integer shelves;

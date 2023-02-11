@@ -85,7 +85,12 @@ public class ShelvesLogController {
     }
 
     @GetMapping("/freezer")
-    public Result freezer(@RequestParam Integer id){
+    public Result freezer(@RequestParam Integer id) {
         return shelvesLogService.freezer(id);
+    }
+    
+    @GetMapping("/data")
+    public Result data(@RequestParam Integer id) {
+        return shelvesLogService.data(id);
     }
 }

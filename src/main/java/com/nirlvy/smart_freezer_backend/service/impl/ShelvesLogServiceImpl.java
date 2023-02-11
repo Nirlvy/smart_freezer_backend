@@ -117,4 +117,10 @@ public class ShelvesLogServiceImpl extends ServiceImpl<ShelvesLogMapper, Shelves
         return Result.success(CollUtil.newArrayList(name, shelves, sold));
     }
 
+    @Override
+    public Result data(Integer id) {
+        
+        return null;
+    }
+
 }

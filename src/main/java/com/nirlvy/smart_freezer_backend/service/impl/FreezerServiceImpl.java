@@ -8,6 +8,9 @@ import org.springframework.stereotype.Service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.nirlvy.smart_freezer_backend.common.Constants;
+import com.nirlvy.smart_freezer_backend.common.Result;
+import com.nirlvy.smart_freezer_backend.controller.FreezerController.Param;
 import com.nirlvy.smart_freezer_backend.entity.Freezer;
 import com.nirlvy.smart_freezer_backend.mapper.FreezerMapper;
 import com.nirlvy.smart_freezer_backend.service.IFreezerService;
@@ -30,6 +33,20 @@ public class FreezerServiceImpl extends ServiceImpl<FreezerMapper, Freezer> impl
         result.put("needfreezer", needfreezer);
         result.put("freezerId", freezerId);
         return result;
+    }
+
+    @Override
+    public Result upmarker(Param freezerinfo) {
+        Freezer freezer = new Freezer();
+        freezer.setId(freezerinfo.id);
+        freezer.setPosition(freezerinfo.position);
+        freezer.setLocation(freezerinfo.location);
+        try {
+            updateById(freezer);
+        } catch (Exception e) {
+            return Result.error(Constants.CODE_500, e.toString());
+        }
+        return Result.success();
     }
 
 }
