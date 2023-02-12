@@ -1,8 +1,9 @@
 package com.nirlvy.smart_freezer_backend.service.impl;
 
-import com.nirlvy.smart_freezer_backend.common.Constants;
 import com.nirlvy.smart_freezer_backend.common.Result;
+import com.nirlvy.smart_freezer_backend.common.ResultCode;
 import com.nirlvy.smart_freezer_backend.entity.ShelvesLog;
+import com.nirlvy.smart_freezer_backend.exception.ServiceException;
 import com.nirlvy.smart_freezer_backend.mapper.ShelvesLogMapper;
 import com.nirlvy.smart_freezer_backend.service.IShelvesLogService;
 
@@ -15,10 +16,12 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import java.io.ByteArrayOutputStream;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -53,11 +56,6 @@ public class ShelvesLogServiceImpl extends ServiceImpl<ShelvesLogMapper, Shelves
     }
 
     @Override
-    public boolean sold(ShelvesLog shelvesLog) {
-        return saveOrUpdate(shelvesLog);
-    }
-
-    @Override
     public Result up(Integer id, String name, Integer num) {
         List<ShelvesLog> list = Stream.generate(() -> {
             ShelvesLog shelvesLog = new ShelvesLog();
@@ -70,7 +68,7 @@ public class ShelvesLogServiceImpl extends ServiceImpl<ShelvesLogMapper, Shelves
         try {
             saveBatch(list);
         } catch (Exception e) {
-            return Result.error(Constants.CODE_500, "上架失败,请稍后再试:" + e);
+            throw new ServiceException(ResultCode.STSTEM_ERROR, e);
         }
         return Result.success();
     }
@@ -96,31 +94,76 @@ public class ShelvesLogServiceImpl extends ServiceImpl<ShelvesLogMapper, Shelves
 
     @Override
     public Result freezer(Integer id) {
-        List<String> name = list(new QueryWrapper<ShelvesLog>().select("distinct name").eq("freezerId", id)).stream()
+        List<String> names = list(new QueryWrapper<ShelvesLog>().select("distinct name").eq("freezerId", id))
+                .stream()
                 .map(ShelvesLog::getName)
                 .collect(Collectors.toList());
-        Long[][] shelves = new Long[name.size()][12];
-        Long[][] sold = new Long[name.size()][12];
-        for (int i = 1; i <= 12; i++) {
-            for (int j = 0; j < name.size(); j++) {
-                LocalDateTime start = LocalDate.of(LocalDate.now().getYear(), i, 1).atStartOfDay();
-                LocalDateTime end = LocalDate.of(LocalDate.now().getYear(), i, 1)
-                        .with(TemporalAdjusters.lastDayOfMonth())
-                        .atTime(23, 59, 59);
-                shelves[j][i - 1] = count(new QueryWrapper<ShelvesLog>().eq("freezerId", id).eq("name", name.get(j))
-                        .between("upTime", start, end));
-                sold[j][i - 1] = count(
-                        new QueryWrapper<ShelvesLog>().eq("freezerId", id).eq("name", name.get(j)).eq("state", 0)
-                                .between("downTime", start, end));
+        Integer[][] shelves = new Integer[names.size()][12];
+        for (int i = 0; i < shelves.length; i++) {
+            for (int j = 0; j < shelves[i].length; j++) {
+                shelves[i][j] = 0;
             }
         }
-        return Result.success(CollUtil.newArrayList(name, shelves, sold));
+        Integer[][] sold = new Integer[names.size()][12];
+        for (int i = 0; i < sold.length; i++) {
+            for (int j = 0; j < sold[i].length; j++) {
+                sold[i][j] = 0;
+            }
+        }
+        try {
+            List<ShelvesLog> allLogs = list(new QueryWrapper<ShelvesLog>().eq("freezerId", id));
+            for (int i = 0; i < allLogs.size(); i++) {
+                int month = allLogs.get(i).getUpTime().getMonthValue();
+                int index = names.indexOf(allLogs.get(i).getName());
+                shelves[index][month - 1]++;
+                if (allLogs.get(i).getState() == false) {
+                    sold[index][month - 1]++;
+                }
+            }
+        } catch (Exception e) {
+            throw new ServiceException(ResultCode.STSTEM_ERROR, e);
+        }
+        return Result.success(CollUtil.newArrayList(names, shelves, sold));
     }
 
     @Override
-    public Result data(Integer id) {
-        
-        return null;
+    public Result monthsCharts(Integer[] freezerId) {
+        Map<Integer, Long[]> result = new HashMap<>();
+        Long[] zeroArray = new Long[12];
+        Arrays.fill(zeroArray, 0L);
+        result.put(0, zeroArray);
+        result.put(1, zeroArray.clone());
+        try {
+            list(new QueryWrapper<ShelvesLog>().in("freezerId", (Object[]) freezerId))
+                    .stream().collect(Collectors.groupingBy(log -> log.getUpTime().getMonthValue()))
+                    .forEach((month, logs) -> {
+                        result.get(0)[month - 1] = logs.stream()
+                                .filter(log -> log.getFreezerId() != null)
+                                .count();
+                        result.get(1)[month - 1] = logs.stream().filter(log -> log.getState() == false)
+                                .count();
+                    });
+        } catch (Exception e) {
+            throw new ServiceException(ResultCode.STSTEM_ERROR, e);
+        }
+        return Result.success(result);
+    }
+
+    @Override
+    public Result soldCharts(Integer[] freezerId) {
+        List<ShelvesLog> log = list(
+                new QueryWrapper<ShelvesLog>().select("distinct name").in("freezerId",
+                        (Object[]) freezerId));
+        List<String> name = log.stream()
+                .map(ShelvesLog::getName)
+                .collect(Collectors.toList());
+        List<Long> sold = new ArrayList<>();
+        for (String n : name) {
+            sold.add(count(
+                    new QueryWrapper<ShelvesLog>().in("freezerId", (Object[]) freezerId)
+                            .eq("name", n).eq("state", 0)));
+        }
+        return Result.success(CollUtil.newArrayList(name, sold));
     }
 
 }

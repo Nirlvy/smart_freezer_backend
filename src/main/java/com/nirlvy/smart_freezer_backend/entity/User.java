@@ -40,12 +40,6 @@ public class User implements Serializable {
     @Alias("管理员")
     private String role;
 
-    @Alias("上架数")
-    private Integer shelves;
-
-    @Alias("售出数")
-    private Integer sold;
-
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @Alias("注册时间")
     private LocalDateTime createTime;

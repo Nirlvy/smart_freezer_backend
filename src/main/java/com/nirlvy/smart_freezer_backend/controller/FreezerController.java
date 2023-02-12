@@ -11,9 +11,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.nirlvy.smart_freezer_backend.common.Constants;
 import com.nirlvy.smart_freezer_backend.common.Result;
+import com.nirlvy.smart_freezer_backend.common.ResultCode;
 import com.nirlvy.smart_freezer_backend.entity.Freezer;
+import com.nirlvy.smart_freezer_backend.exception.ServiceException;
 import com.nirlvy.smart_freezer_backend.service.IFreezerService;
 
 @RestController
@@ -31,14 +32,12 @@ public class FreezerController {
 
     @GetMapping("/home")
     public Result homeinfo(@RequestParam Integer id) {
-        return Result.success(freezerService.homeinfo(id));
+        return freezerService.home(id);
     }
 
     @GetMapping("/list")
     public List<Freezer> list(@RequestParam Integer id) {
-        QueryWrapper<Freezer> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("userId", id);
-        return freezerService.list(queryWrapper);
+        return freezerService.list(new QueryWrapper<Freezer>().eq("userId", id));
     }
 
     @PostMapping("/upmarker")
@@ -51,7 +50,7 @@ public class FreezerController {
         try {
             freezerService.updateById(freezer);
         } catch (Exception e) {
-            return Result.error(Constants.CODE_500, e.toString());
+            throw new ServiceException(ResultCode.STSTEM_ERROR, e);
         }
         return Result.success();
     }

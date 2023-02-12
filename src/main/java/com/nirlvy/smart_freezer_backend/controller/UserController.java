@@ -11,12 +11,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.nirlvy.smart_freezer_backend.common.Constants;
 import com.nirlvy.smart_freezer_backend.common.Result;
 import com.nirlvy.smart_freezer_backend.entity.Ulogin;
 import com.nirlvy.smart_freezer_backend.entity.User;
 import com.nirlvy.smart_freezer_backend.service.IUserService;
-import cn.hutool.core.util.StrUtil;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.util.List;
@@ -34,27 +32,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 @RestController
 @RequestMapping("/user")
 public class UserController {
-    
+
     @Autowired
     private IUserService userService;
 
     @PostMapping("/login")
     public Result login(@RequestBody Ulogin ulogin) {
-        String userName = ulogin.getUserName();
-        String password = ulogin.getPassword();
-        if (StrUtil.isBlank(userName) || StrUtil.isBlank(password))
-            return Result.error(Constants.CODE_400, "参数错误");
-        Ulogin login = userService.login(ulogin);
-        return Result.success(login);
+        return userService.login(ulogin);
     }
 
     @PostMapping("/register")
     public Result register(@RequestBody Ulogin ulogin) {
-        String userName = ulogin.getUserName();
-        String password = ulogin.getPassword();
-        if (StrUtil.isBlank(userName) || StrUtil.isBlank(password))
-            return Result.error(Constants.CODE_400, "参数错误");
-        return Result.success(userService.register(ulogin));
+        return userService.register(ulogin);
     }
 
     @PostMapping
@@ -82,9 +71,7 @@ public class UserController {
             @RequestParam(defaultValue = "") String userName, @RequestParam(defaultValue = "") String createTime,
             @RequestParam(required = false) Integer shelves, @RequestParam(required = false) Integer sold,
             @RequestParam Integer pageNum, @RequestParam Integer pageSize) {
-
         return userService.findPage(id, userName, createTime, shelves, sold, pageNum, pageSize);
-
     }
 
     @GetMapping("/export")

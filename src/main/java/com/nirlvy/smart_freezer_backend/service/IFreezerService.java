@@ -9,7 +9,9 @@ import com.nirlvy.smart_freezer_backend.entity.Freezer;
 
 public interface IFreezerService extends IService<Freezer> {
 
-    Map<String, Object> homeinfo(Integer id);
+    public Map<String, Object> homeinfo(Integer id);
+
+    Result home(Integer id);
 
     Result upmarker(Param freezer);
 

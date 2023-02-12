@@ -1,8 +1,9 @@
 package com.nirlvy.smart_freezer_backend.service.impl;
 
-import com.nirlvy.smart_freezer_backend.common.Constants;
 import com.nirlvy.smart_freezer_backend.common.Result;
+import com.nirlvy.smart_freezer_backend.common.ResultCode;
 import com.nirlvy.smart_freezer_backend.entity.Goods;
+import com.nirlvy.smart_freezer_backend.exception.ServiceException;
 import com.nirlvy.smart_freezer_backend.mapper.GoodsMapper;
 import com.nirlvy.smart_freezer_backend.service.IGoodsService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -31,7 +32,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         try {
             save(goods);
         } catch (Exception e) {
-            return Result.error(Constants.CODE_500, e.toString());
+            throw new ServiceException(ResultCode.STSTEM_ERROR, e);
         }
         return Result.success();
     }
@@ -41,7 +42,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         try {
             removeBatchByIds(ids);
         } catch (Exception e) {
-            return Result.error(Constants.CODE_500, e.toString());
+            throw new ServiceException(ResultCode.STSTEM_ERROR, e);
         }
         return Result.success();
     }
@@ -57,7 +58,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
             updateBatchById(goodsList);
             updateBatchById(goods);
         } catch (Exception e) {
-            return Result.error(Constants.CODE_500, e.toString());
+            throw new ServiceException(ResultCode.STSTEM_ERROR, e);
         }
         return Result.success();
     }

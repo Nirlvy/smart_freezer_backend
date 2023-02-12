@@ -8,10 +8,11 @@ import org.springframework.stereotype.Service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.nirlvy.smart_freezer_backend.common.Constants;
 import com.nirlvy.smart_freezer_backend.common.Result;
+import com.nirlvy.smart_freezer_backend.common.ResultCode;
 import com.nirlvy.smart_freezer_backend.controller.FreezerController.Param;
 import com.nirlvy.smart_freezer_backend.entity.Freezer;
+import com.nirlvy.smart_freezer_backend.exception.ServiceException;
 import com.nirlvy.smart_freezer_backend.mapper.FreezerMapper;
 import com.nirlvy.smart_freezer_backend.service.IFreezerService;
 
@@ -20,9 +21,7 @@ public class FreezerServiceImpl extends ServiceImpl<FreezerMapper, Freezer> impl
 
     @Override
     public Map<String, Object> homeinfo(Integer id) {
-        QueryWrapper<Freezer> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("userId", id);
-        List<Freezer> list = list(queryWrapper);
+        List<Freezer> list = list(new QueryWrapper<Freezer>().eq("userId", id));
         Integer totalfreezer = list.size();
         Long runfreezer = list.stream().filter(item -> item.getEnable() == true).count();
         Long needfreezer = list.stream().filter(item -> item.getNeed() == true).count();
@@ -36,6 +35,11 @@ public class FreezerServiceImpl extends ServiceImpl<FreezerMapper, Freezer> impl
     }
 
     @Override
+    public Result home(Integer id) {
+        return Result.success(homeinfo(id));
+    }
+
+    @Override
     public Result upmarker(Param freezerinfo) {
         Freezer freezer = new Freezer();
         freezer.setId(freezerinfo.id);
@@ -44,7 +48,7 @@ public class FreezerServiceImpl extends ServiceImpl<FreezerMapper, Freezer> impl
         try {
             updateById(freezer);
         } catch (Exception e) {
-            return Result.error(Constants.CODE_500, e.toString());
+            throw new ServiceException(ResultCode.STSTEM_ERROR, e);
         }
         return Result.success();
     }

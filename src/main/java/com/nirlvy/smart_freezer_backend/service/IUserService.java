@@ -1,5 +1,6 @@
 package com.nirlvy.smart_freezer_backend.service;
 
+import com.nirlvy.smart_freezer_backend.common.Result;
 import com.nirlvy.smart_freezer_backend.entity.Ulogin;
 import com.nirlvy.smart_freezer_backend.entity.User;
 
@@ -20,7 +21,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IUserService extends IService<User> {
 
-    Ulogin login(Ulogin ulogin);
+    Result login(Ulogin ulogin);
 
     boolean export(HttpServletResponse response) throws Exception;
 
@@ -29,7 +30,7 @@ public interface IUserService extends IService<User> {
     IPage<User> findPage(Integer id, String userName, String createTime, Integer shelves, Integer sold, Integer pageNum,
             Integer pageSize);
 
-    Ulogin register(Ulogin ulogin);
+    Result register(Ulogin ulogin);
 
     boolean sOu(User user);
 

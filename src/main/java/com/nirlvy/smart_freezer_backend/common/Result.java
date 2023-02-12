@@ -1,30 +1,34 @@
 package com.nirlvy.smart_freezer_backend.common;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class Result {
-    private String code;
+    private Integer code;
     private String msg;
     private Object data;
 
     public static Result success() {
-        return new Result(Constants.CODE_200, "", null);
+        Result result = new Result();
+        result.setCode(ResultCode.SUCCESS.getCode());
+        result.setMsg(ResultCode.SUCCESS.getMsg());
+        return result;
     }
 
     public static Result success(Object data) {
-        return new Result(Constants.CODE_200, "", data);
+        Result result = new Result();
+        result.setCode(ResultCode.SUCCESS.getCode());
+        result.setMsg(ResultCode.SUCCESS.getMsg());
+        result.setData(data);
+        return result;
     }
 
-    public static Result error(String code, String msg) {
-        return new Result(code, msg, null);
-    }
-
-    public static Result error() {
-        return new Result(Constants.CODE_500, "系统错误", null);
+    public static Result error(Integer code, String msg) {
+        Result result = new Result();
+        result.setCode(code);
+        result.setMsg(msg);
+        return result;
     }
 }

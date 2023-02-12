@@ -9,7 +9,7 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.nirlvy.smart_freezer_backend.common.Constants;
+import com.nirlvy.smart_freezer_backend.common.ResultCode;
 import com.nirlvy.smart_freezer_backend.entity.User;
 import com.nirlvy.smart_freezer_backend.exception.ServiceException;
 import com.nirlvy.smart_freezer_backend.service.IUserService;
@@ -31,26 +31,26 @@ public class JwtInterceptor implements HandlerInterceptor {
         }
         // 执行认证
         if (StrUtil.isBlank(token)) {
-            throw new ServiceException(Constants.CODE_401, "无token,请重新登录");
+            throw new ServiceException(ResultCode.TOKEN_NOT_EXISTS, null);
         }
         // 获取token的userId
         String userId;
         try {
             userId = JWT.decode(token).getAudience().get(0);
         } catch (JWTDecodeException j) {
-            throw new ServiceException(Constants.CODE_401, "token验证失败");
+            throw new ServiceException(ResultCode.FAKE_TOKEN, null);
         }
         // 根据token中的userid查询数据库
         User user = userService.getById(userId);
         if (user == null) {
-            throw new ServiceException(Constants.CODE_401, "用户不存在，请重新登录");
+            throw new ServiceException(ResultCode.UNKNOWN_USER, null);
         }
         // 验证token
         JWTVerifier jwtVerifier = JWT.require(Algorithm.HMAC256(user.getPassword().toString())).build();
         try {
             jwtVerifier.verify(token);
         } catch (JWTVerificationException e) {
-            throw new ServiceException(Constants.CODE_401, "token验证失败，请重新登录");
+            throw new ServiceException(ResultCode.TOKEN_ERROR, null);
         }
 
         return true;

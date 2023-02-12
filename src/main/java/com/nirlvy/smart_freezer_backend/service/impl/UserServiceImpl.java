@@ -1,6 +1,7 @@
 package com.nirlvy.smart_freezer_backend.service.impl;
 
-import com.nirlvy.smart_freezer_backend.common.Constants;
+import com.nirlvy.smart_freezer_backend.common.Result;
+import com.nirlvy.smart_freezer_backend.common.ResultCode;
 import com.nirlvy.smart_freezer_backend.entity.Ulogin;
 import com.nirlvy.smart_freezer_backend.entity.User;
 import com.nirlvy.smart_freezer_backend.exception.ServiceException;
@@ -10,6 +11,7 @@ import com.nirlvy.smart_freezer_backend.service.IUserService;
 import com.nirlvy.smart_freezer_backend.utils.TokenUtils;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
@@ -51,13 +53,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         try {
             one = getOne(queryWrapper);
         } catch (Exception e) {
-            throw new ServiceException(Constants.CODE_500, "系统错误");
+            throw new ServiceException(ResultCode.STSTEM_ERROR, e);
         }
         return one;
     }
 
     @Override
-    public Ulogin login(Ulogin ulogin) {
+    public Result login(Ulogin ulogin) {
+        String userName = ulogin.getUserName();
+        String password = ulogin.getPassword();
+        if (StrUtil.isBlank(userName) || StrUtil.isBlank(password)) {
+            throw new ServiceException(ResultCode.USERNAME_OR_PASSWORD_IS_BLANK, null);
+        }
         User one = getuserinfo(ulogin);
         if (one != null) {
             BeanUtil.copyProperties(one, ulogin, true);
@@ -66,21 +73,26 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             String role = one.getRole();
             List<Integer> menu = roleMenuMapper.selectByRole(role);
             ulogin.setMenus(menu);
-            return ulogin;
+            return Result.success(ulogin);
         } else {
-            throw new ServiceException(Constants.CODE_600, "用户名或密码错误");
+            throw new ServiceException(ResultCode.USERNAME_OR_PASSWORD_INCORRECT, null);
         }
     }
 
     @Override
-    public Ulogin register(Ulogin ulogin) {
+    public Result register(Ulogin ulogin) {
+        String userName = ulogin.getUserName();
+        String password = ulogin.getPassword();
+        if (StrUtil.isBlank(userName) || StrUtil.isBlank(password)) {
+            throw new ServiceException(ResultCode.USERNAME_OR_PASSWORD_IS_BLANK, null);
+        }
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("userName", ulogin.getUserName());
         User one;
         try {
             one = getOne(queryWrapper);
         } catch (Exception e) {
-            throw new ServiceException(Constants.CODE_500, "系统错误:" + e);
+            throw new ServiceException(ResultCode.STSTEM_ERROR, e);
         }
         if (one == null) {
             one = new User();
@@ -92,9 +104,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             List<Integer> menu = roleMenuMapper.selectByRole(userinfo.getRole().toString());
             ulogin.setMenus(menu);
         } else {
-            throw new ServiceException(Constants.CODE_600, "用户名已存在");
+            throw new ServiceException(ResultCode.USERNAME_ALREADY_EXISTS, null);
         }
-        return ulogin;
+        return Result.success(ulogin);
     }
 
     @Override

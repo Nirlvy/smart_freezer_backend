@@ -43,18 +43,12 @@ public class ShelvesLogController {
     }
 
     @PostMapping("/page")
-    public IPage<ShelvesLog> findPage(@RequestParam Integer id,
+    public IPage<ShelvesLog> findPage(
             @RequestBody Param datas, @RequestParam(required = false) Boolean state,
             @RequestParam(required = false) String upTime,
             @RequestParam(required = false) String downTime,
             @RequestParam Integer pageNum, @RequestParam Integer pageSize) {
-        Integer[] freezerId = datas.freezerId;
-        String[] name = datas.name;
-        if (freezerId == null || freezerId.length == 0) {
-            Map<String, Object> homeinfoResult = freezerService.homeinfo(id);
-            freezerId = (Integer[]) homeinfoResult.get("freezerId");
-        }
-        return shelvesLogService.findPage(freezerId, name, state, upTime, downTime, pageNum, pageSize);
+        return shelvesLogService.findPage(datas.freezerId, datas.name, state, upTime, downTime, pageNum, pageSize);
     }
 
     @DeleteMapping("/{id}")
@@ -67,9 +61,9 @@ public class ShelvesLogController {
         return shelvesLogService.removeBatchByIds(ids);
     }
 
-    @PostMapping("/sold")
-    public boolean sold(@RequestBody ShelvesLog shelvesLog) {
-        return shelvesLogService.sold(shelvesLog);
+    @PostMapping("/update")
+    public boolean update(@RequestBody ShelvesLog shelvesLog) {
+        return shelvesLogService.updateById(shelvesLog);
     }
 
     @PostMapping("/up")
@@ -79,7 +73,7 @@ public class ShelvesLogController {
 
     @GetMapping("/export")
     public byte[] export(@RequestParam Integer id) throws Exception {
-        Map<String, Object> homeinfoResult = freezerService.homeinfo(id);
+        Map<String, Object> homeinfoResult = (Map<String, Object>) freezerService.homeinfo(id);
         Integer[] freezerId = (Integer[]) homeinfoResult.get("freezerId");
         return shelvesLogService.export(freezerId);
     }
@@ -88,9 +82,14 @@ public class ShelvesLogController {
     public Result freezer(@RequestParam Integer id) {
         return shelvesLogService.freezer(id);
     }
-    
-    @GetMapping("/data")
-    public Result data(@RequestParam Integer id) {
-        return shelvesLogService.data(id);
+
+    @PostMapping("/monthsCharts")
+    public Result monthsCharts(@RequestBody Integer[] freezerId) {
+        return shelvesLogService.monthsCharts(freezerId);
+    }
+
+    @PostMapping("/soldCharts")
+    public Result soldCharts(@RequestBody Integer[] freezerId) {
+        return shelvesLogService.soldCharts(freezerId);
     }
 }

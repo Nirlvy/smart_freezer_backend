@@ -18,13 +18,13 @@ public interface IShelvesLogService extends IService<ShelvesLog> {
     IPage<ShelvesLog> findPage(Integer[] freezerId, String[] name, Boolean state, String upTime,
             String downTime, Integer pageNum, Integer pageSize);
 
-    boolean sold(ShelvesLog shelvesLog);
-
     Result up(Integer id, String name, Integer num);
 
     byte[] export(Integer[] freezerId) throws Exception;
 
     Result freezer(Integer id);
 
-    Result data(Integer id);
+    Result monthsCharts(Integer[] freezerId);
+
+    Result soldCharts(Integer[] freezerId);
 }

@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.nirlvy.smart_freezer_backend.common.Constants;
+import com.nirlvy.smart_freezer_backend.common.ResultCode;
 import com.nirlvy.smart_freezer_backend.entity.Files;
 import com.nirlvy.smart_freezer_backend.exception.ServiceException;
 import com.nirlvy.smart_freezer_backend.mapper.FilesMapper;
@@ -65,7 +65,7 @@ public class FilesController {
             try {
                 file.transferTo(uploadFile);
             } catch (IOException e) {
-                throw new ServiceException(Constants.CODE_500, "保存失败");
+                throw new ServiceException(ResultCode.STSTEM_ERROR, e);
             }
             // TODO:需要修改
             url = "http://localhost:8080/file/" + fileUUID;
@@ -100,7 +100,7 @@ public class FilesController {
             outputStream.flush();
             outputStream.close();
         } catch (IOException e) {
-            throw new ServiceException(Constants.CODE_500, "下载失败");
+            throw new ServiceException(ResultCode.STSTEM_ERROR, e);
         }
     }
 
