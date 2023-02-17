@@ -19,6 +19,8 @@ import com.nirlvy.smart_freezer_backend.entity.ShelvesLog;
 import com.nirlvy.smart_freezer_backend.service.IFreezerService;
 import com.nirlvy.smart_freezer_backend.service.IShelvesLogService;
 
+import jakarta.servlet.http.HttpServletResponse;
+
 /**
  * <p>
  * 前端控制器
@@ -72,10 +74,10 @@ public class ShelvesLogController {
     }
 
     @GetMapping("/export")
-    public byte[] export(@RequestParam Integer id) throws Exception {
+    public void export(HttpServletResponse response, @RequestParam Integer id) throws Exception {
         Map<String, Object> homeinfoResult = (Map<String, Object>) freezerService.homeinfo(id);
         Integer[] freezerId = (Integer[]) homeinfoResult.get("freezerId");
-        return shelvesLogService.export(freezerId);
+        shelvesLogService.export(response,freezerId);
     }
 
     @GetMapping("/freezer")
@@ -83,13 +85,8 @@ public class ShelvesLogController {
         return shelvesLogService.freezer(id);
     }
 
-    @PostMapping("/monthsCharts")
-    public Result monthsCharts(@RequestBody Integer[] freezerId) {
-        return shelvesLogService.monthsCharts(freezerId);
-    }
-
-    @PostMapping("/soldCharts")
-    public Result soldCharts(@RequestBody Integer[] freezerId) {
-        return shelvesLogService.soldCharts(freezerId);
+    @PostMapping("/homeinfo")
+    public Result homeinfo(@RequestBody Integer[] freezerId) {
+        return shelvesLogService.homeinfo(freezerId);
     }
 }

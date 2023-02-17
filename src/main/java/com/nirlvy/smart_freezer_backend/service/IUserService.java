@@ -23,7 +23,7 @@ public interface IUserService extends IService<User> {
 
     Result login(Ulogin ulogin);
 
-    boolean export(HttpServletResponse response) throws Exception;
+    void export(HttpServletResponse response) throws Exception;
 
     boolean imp(MultipartFile file) throws Exception;
 

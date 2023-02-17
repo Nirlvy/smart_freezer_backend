@@ -8,14 +8,17 @@ import com.nirlvy.smart_freezer_backend.mapper.ShelvesLogMapper;
 import com.nirlvy.smart_freezer_backend.service.IShelvesLogService;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServletResponse;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
-import java.io.ByteArrayOutputStream;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -74,22 +77,18 @@ public class ShelvesLogServiceImpl extends ServiceImpl<ShelvesLogMapper, Shelves
     }
 
     @Override
-    public byte[] export(Integer[] freezerId) throws Exception {
+    public void export(HttpServletResponse response, Integer[] freezerId) throws Exception {
         QueryWrapper<ShelvesLog> queryWrapper = new QueryWrapper<>();
         queryWrapper.in("freezerId", (Object[]) freezerId);
         List<ShelvesLog> list = list();
-        // 通过工具类创建writer，默认创建xls格式
-        // ExcelWriter writer = ExcelUtil.getWriter();
-        // 创建xlsx格式的
         ExcelWriter writer = ExcelUtil.getWriter(true);
-        // 一次性写出内容，使用默认样式，强制输出标题
         writer.write(list, true);
-        // out为OutputStream，需要写出到的目标流
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        writer.flush(stream);
-        // 关闭writer，释放内存
+        response.setContentType("application/vnd.ms-excel");
+        response.setHeader("Content-Disposition", "attachment;filename=data.xlsx");
+        ServletOutputStream out = response.getOutputStream();
+        writer.flush(out, true);
         writer.close();
-        return stream.toByteArray();
+        IoUtil.close(out);
     }
 
     @Override
@@ -127,30 +126,27 @@ public class ShelvesLogServiceImpl extends ServiceImpl<ShelvesLogMapper, Shelves
     }
 
     @Override
-    public Result monthsCharts(Integer[] freezerId) {
-        Map<Integer, Long[]> result = new HashMap<>();
+    public Result homeinfo(Integer[] freezerId) {
+        Map<String, Object> result = new HashMap<>();
+        Map<Integer, Long[]> monthsCharts = new HashMap<>();
         Long[] zeroArray = new Long[12];
         Arrays.fill(zeroArray, 0L);
-        result.put(0, zeroArray);
-        result.put(1, zeroArray.clone());
+        monthsCharts.put(0, zeroArray);
+        monthsCharts.put(1, zeroArray.clone());
         try {
             list(new QueryWrapper<ShelvesLog>().in("freezerId", (Object[]) freezerId))
                     .stream().collect(Collectors.groupingBy(log -> log.getUpTime().getMonthValue()))
                     .forEach((month, logs) -> {
-                        result.get(0)[month - 1] = logs.stream()
+                        monthsCharts.get(0)[month - 1] = logs.stream()
                                 .filter(log -> log.getFreezerId() != null)
                                 .count();
-                        result.get(1)[month - 1] = logs.stream().filter(log -> log.getState() == false)
+                        monthsCharts.get(1)[month - 1] = logs.stream().filter(log -> log.getState() == false)
                                 .count();
                     });
         } catch (Exception e) {
             throw new ServiceException(ResultCode.STSTEM_ERROR, e);
         }
-        return Result.success(result);
-    }
-
-    @Override
-    public Result soldCharts(Integer[] freezerId) {
+        result.put("monthsCharts", monthsCharts);
         List<ShelvesLog> log = list(
                 new QueryWrapper<ShelvesLog>().select("distinct name").in("freezerId",
                         (Object[]) freezerId));
@@ -163,7 +159,16 @@ public class ShelvesLogServiceImpl extends ServiceImpl<ShelvesLogMapper, Shelves
                     new QueryWrapper<ShelvesLog>().in("freezerId", (Object[]) freezerId)
                             .eq("name", n).eq("state", 0)));
         }
-        return Result.success(CollUtil.newArrayList(name, sold));
+        result.put("soldCharts", CollUtil.newArrayList(name, sold));
+        Long[] shelves = new Long[freezerId.length];
+        try {
+            for (int i = 0; i < freezerId.length; i++) {
+                shelves[i] = count(new QueryWrapper<ShelvesLog>().eq("freezerId", freezerId[i]));
+            }
+        } catch (Exception e) {
+            throw new ServiceException(ResultCode.STSTEM_ERROR, e);
+        }
+        result.put("shelves", shelves);
+        return Result.success(result);
     }
-
 }

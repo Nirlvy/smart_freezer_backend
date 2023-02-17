@@ -19,8 +19,7 @@ public class Freezer {
     private String position;
     private String location;
     private Integer capacity;
-    private Integer shelves;
-    private Boolean enable;
+    private Boolean disabled;
     private Boolean need;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime lastSupply;

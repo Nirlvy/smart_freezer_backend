@@ -38,6 +38,9 @@ public class FilesController {
     @Value("${files.upload.path}")
     private String fileUploadPath;
 
+    @Value("${files.server}")
+    private String server;
+
     @Resource
     private FilesMapper fileMapper;
 
@@ -67,8 +70,7 @@ public class FilesController {
             } catch (IOException e) {
                 throw new ServiceException(ResultCode.STSTEM_ERROR, e);
             }
-            // TODO:需要修改
-            url = "http://localhost:8080/file/" + fileUUID;
+            url = server + "/file/" + fileUUID;
             Files saveFile = new Files();
             saveFile.setUrl(url);
             saveFile.setMd5(md5);

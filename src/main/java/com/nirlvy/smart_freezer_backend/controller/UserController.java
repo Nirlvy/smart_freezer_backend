@@ -75,8 +75,8 @@ public class UserController {
     }
 
     @GetMapping("/export")
-    public boolean export(HttpServletResponse response) throws Exception {
-        return userService.export(response);
+    public void export(HttpServletResponse response) throws Exception {
+        userService.export(response);
     }
 
     @PostMapping("/import")

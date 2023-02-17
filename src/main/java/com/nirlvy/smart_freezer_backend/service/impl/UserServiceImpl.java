@@ -11,6 +11,7 @@ import com.nirlvy.smart_freezer_backend.service.IUserService;
 import com.nirlvy.smart_freezer_backend.utils.TokenUtils;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
@@ -25,7 +26,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import java.io.InputStream;
-import java.net.URLEncoder;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -99,6 +99,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             BeanUtil.copyProperties(ulogin, one, true);
             save(one);
             User userinfo = getuserinfo(ulogin);
+            ulogin.setId(userinfo.getId());
             String token = TokenUtils.genToken(userinfo.getId().toString(), one.getPassword().toString());
             ulogin.setToken(token);
             List<Integer> menu = roleMenuMapper.selectByRole(userinfo.getRole().toString());
@@ -110,21 +111,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     }
 
     @Override
-    public boolean export(HttpServletResponse response) throws Exception {
+    public void export(HttpServletResponse response) throws Exception {
         List<User> list = list();
         ExcelWriter writer = ExcelUtil.getWriter(true);
-
         writer.write(list, true);
-
-        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;chatset=utf-8");
-        String fileName = URLEncoder.encode("用户信息", "UTF-8");
-        response.setHeader("Content-Disposition", "attachment;filename=" + fileName + ".xlsx");
-
-        ServletOutputStream out = response.getOutputStream();
+        response.setContentType("application/vnd.ms-excel");
+        response.setHeader("Content-Disposition", "attachment;filename=data.xlsx");
+        ServletOutputStream out=response.getOutputStream(); 
         writer.flush(out, true);
-        out.close();
         writer.close();
-        return true;
+        IoUtil.close(out);
     }
 
     @Override
